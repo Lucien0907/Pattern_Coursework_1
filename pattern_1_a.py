@@ -19,13 +19,16 @@ def compute_eigenspace(X_data, mode):
     N, D = X_data.shape
     X_avg = X_data.mean(0)
     X_avgm = np.array([X_avg]*N)
+    A = (X_data - X_avgm).T
     if mode == "high":
-        A = (X_data - X_avgm).T    
+        S = A.dot(A.T) / N
+        e_vals, e_vecs = np.linalg.eig(S)
     elif mode == "low":
-        A = (X_data - X_avgm)
-    S = A.dot(A.T) / N
-    e_vals, e_vecs = np.linalg.eig(S)
-    return X_avg, e_vals, e_vecs
+        S = (A.T).dot(A) / N
+        e_vals, e_vecs = np.linalg.eig(S)
+        e_vecs = np.dot(A,e_vecs)
+        e_vecs = e_vecs / np.linalg.norm(e_vecs, axis=0)
+    return X_avg, A, e_vals, e_vecs
 
 def plot_image(face_vector, w, h):
     # Reshape the given image data, plot the image
@@ -50,10 +53,10 @@ face_labels = mat_content['l']
 
 # Split into a training and testing set
 X_train, X_test, y_train, y_test = train_test_split(face_data.T, face_labels.T, test_size=0.25, random_state=42)
-X_avg, e_vals, e_vecs = compute_eigenspace(X_train, 'high')
+X_avg, A, e_vals, e_vecs = compute_eigenspace(X_train, 'low')
 """
 plt.subplot(2,1,1)
-plot_image(X_avg, 46, 56, 'average face')
+plot_image(X_avg, 46, 56, 'mean face')
 """
 # Sort eigen vectors and eigen value in descending order
 idx=np.argsort(np.absolute(e_vals))[::-1]
@@ -64,9 +67,21 @@ plt.subplot(2,1,2)
 plot_eig_value(e_vals, 30)
 """
 # Choose and plot the best M eigenfaces
-M = 25
+M = 350
+"""
 for i in range(M):
     plt.subplot(M/5,5,i+1)
     plot_image(e_vecs[:,i], 46, 56)
-
+"""
+test=29
 # Face reconstruction
+X_proj=np.dot(A[:,test].T, e_vecs[:,:M])
+Xa=e_vecs[:,:M]*X_proj
+X_reconst=X_avg+np.sum(Xa, axis=1)
+
+# Plot original face
+plt.subplot(1,2,2)
+plot_image(X_train[test,:], 46, 56)
+#Plot reconstructed face
+plt.subplot(1,2,1)
+plot_image(X_reconst, 46, 56)
