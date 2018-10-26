@@ -53,7 +53,7 @@ face_labels = mat_content['l']
 
 # Split into a training and testing set
 X_train, X_test, y_train, y_test = train_test_split(face_data.T, face_labels.T, test_size=0.25, random_state=42)
-X_avg, A, e_vals, e_vecs = compute_eigenspace(X_train, 'low')
+X_avg, A, e_vals, e_vecs= compute_eigenspace(X_train, 'low')
 """
 plt.subplot(2,1,1)
 plot_image(X_avg, 46, 56, 'mean face')
@@ -67,21 +67,38 @@ plt.subplot(2,1,2)
 plot_eig_value(e_vals, 30)
 """
 # Choose and plot the best M eigenfaces
-M = 350
+M = 65
 """
 for i in range(M):
     plt.subplot(M/5,5,i+1)
     plot_image(e_vecs[:,i], 46, 56)
 """
-test=29
+
 # Face reconstruction
-X_proj=np.dot(A[:,test].T, e_vecs[:,:M])
+test1=29
+X_proj=np.dot(A[:,test1].T, e_vecs[:,:M])
 Xa=e_vecs[:,:M]*X_proj
 X_reconst=X_avg+np.sum(Xa, axis=1)
 
 # Plot original face
 plt.subplot(1,2,2)
-plot_image(X_train[test,:], 46, 56)
+plot_image(X_train[test1,:], 46, 56)
 #Plot reconstructed face
 plt.subplot(1,2,1)
 plot_image(X_reconst, 46, 56)
+
+# Classification
+mark = 0
+test_size = X_test.shape[0]
+for i in range(test_size):
+    Wt=np.dot(X_test[i,:]-X_avg, e_vecs[:,:M])
+    Wn=np.dot(A.T, e_vecs[:,:M])
+    E = np.linalg.norm(Wt.T - Wn, axis=1)
+    e_idx = np.argmin(E)
+    y = y_train[e_idx]
+    ans = y_test[i]
+    if y == ans:
+        mark+=1
+correctness = mark/test_size
+print("Correctness = %2f percentage" % (correctness*100))
+
