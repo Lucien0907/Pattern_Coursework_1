@@ -2,17 +2,16 @@
 # -*- coding: utf-8 -*-
 """
 Created on Mon Oct 22 19:42:55 2018
-
 @author: lucien
 """
 
 from __future__ import print_function
+from sklearn.model_selection import train_test_split
 
 import numpy as np
 import scipy.io as sio
 import matplotlib.pyplot as plt
-
-from sklearn.model_selection import train_test_split
+import matplotlib.ticker as ticker
 
 def compute_eigenspace(X_data, mode):
     # Using high/low dimensional computation, return the average vector and the eigenspace of the given data.
@@ -30,20 +29,28 @@ def compute_eigenspace(X_data, mode):
         e_vecs = e_vecs / np.linalg.norm(e_vecs, axis=0)
     return X_avg, A, e_vals, e_vecs
 
-def plot_image(face_vector, w, h):
+def plot_image(face_vector, w, h, filename):
     # Reshape the given image data, plot the image
     image = np.reshape(np.absolute(face_vector),(w,h)).T
-    plt.imshow(image, cmap = 'gist_gray')
-    #plt.title(title)
+    fig = plt.imshow(image, cmap = 'gist_gray')
+    fig.axes.get_xaxis().set_visible(False)
+    fig.axes.get_yaxis().set_visible(False)
     plt.axis('off')
+    plt.savefig(filename, pad_inches = 0, bbox_inches='tight')
+    plt.close()
     return
 
-def plot_eig_value(eig_value, i):
+def plot_graph(eig_value, i, x, y, xtick, ytick, filename):
     # Plot the first i eigenvalues
-    plt.plot(eig_value[:i])
-    plt.xlabel('index', fontsize=10)
-    plt.ylabel('eigen value', fontsize=10)
+    fig, ax = plt.subplots(1,1)
+    ax.plot(list(range(0, i)), eig_value[:i])
+    ax.xaxis.set_major_locator(ticker.MultipleLocator(xtick))
+    ax.yaxis.set_major_locator(ticker.MultipleLocator(ytick))
+    plt.xlabel(x, fontsize=10)
+    plt.ylabel(y, fontsize=10)
+    plt.savefig(filename, pad_inches = 0, bbox_inches='tight')
     plt.show()
+    plt.close()
     return
 
 #Load image data
@@ -52,27 +59,22 @@ face_data = mat_content['X']
 face_labels = mat_content['l']
 
 # Split into a training and testing set
-X_train, X_test, y_train, y_test = train_test_split(face_data.T, face_labels.T, test_size=0.25, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(face_data.T, face_labels.T, test_size=0.3, random_state=42)
 X_avg, A, e_vals, e_vecs= compute_eigenspace(X_train, 'low')
-"""
-plt.subplot(2,1,1)
-plot_image(X_avg, 46, 56, 'mean face')
-"""
+
+# Plot mean face
+plot_image(X_avg, 46, 56, 'Outputs/mean_face')
+
 # Sort eigen vectors and eigen value in descending order
 idx=np.argsort(np.absolute(e_vals))[::-1]
 e_vals = e_vals[idx]
 e_vecs = (e_vecs.T[idx]).T
-"""
-plt.subplot(2,1,2)
-plot_eig_value(e_vals, 30)
-"""
+
 # Choose and plot the best M eigenfaces
-M = 65
-"""
+M = 20
+plot_graph(e_vals, M, 'index', 'eigen_value', 1, 100000, 'Outputs/first_'+str(M)+'_eigenvalues')
 for i in range(M):
-    plt.subplot(M/5,5,i+1)
-    plot_image(e_vecs[:,i], 46, 56)
-"""
+    plot_image(e_vecs[:,i], 46, 56, 'Outputs/eigenface_'+str(i))
 
 # Face reconstruction
 test1=29
@@ -80,25 +82,25 @@ X_proj=np.dot(A[:,test1].T, e_vecs[:,:M])
 Xa=e_vecs[:,:M]*X_proj
 X_reconst=X_avg+np.sum(Xa, axis=1)
 
-# Plot original face
-plt.subplot(1,2,2)
-plot_image(X_train[test1,:], 46, 56)
-#Plot reconstructed face
-plt.subplot(1,2,1)
-plot_image(X_reconst, 46, 56)
+# Plot the chosen test face & reconstructed face for comparison
+plot_image(X_train[test1,:], 46, 56, 'Outputs/test_face_M='+str(M))
+plot_image(X_reconst, 46, 56, 'Outputs/reconstructed_face_M='+str(M))
 
 # Classification
-mark = 0
+M_range=100
 test_size = X_test.shape[0]
-for i in range(test_size):
-    Wt=np.dot(X_test[i,:]-X_avg, e_vecs[:,:M])
-    Wn=np.dot(A.T, e_vecs[:,:M])
-    E = np.linalg.norm(Wt.T - Wn, axis=1)
-    e_idx = np.argmin(E)
-    y = y_train[e_idx]
-    ans = y_test[i]
-    if y == ans:
-        mark+=1
-correctness = mark/test_size
-print("Correctness = %2f percentage" % (correctness*100))
+correctness = np.zeros(M_range)
+for m in range(M_range):
+    mark = 0
+    for i in range(test_size):
+        Wt=np.dot(X_test[i,:]-X_avg, e_vecs[:,:m])
+        Wn=np.dot(A.T, e_vecs[:,:m])
+        E = np.linalg.norm(Wt.T - Wn, axis=1)
+        e_idx = np.argmin(E)
+        if y_train[e_idx] == y_test[i]:
+            mark+=1
+    correctness[m] = (mark/test_size)*100
 
+# Plot success rate against M
+plot_graph(correctness, M_range, 'M', 'success rate', 10, 10, 'Outputs/success_rate_against_M')
+print("Highest succes rate %.2f%% when M = %d" % (np.max(correctness), np.argmax(correctness)))
