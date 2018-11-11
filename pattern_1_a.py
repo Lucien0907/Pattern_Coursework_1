@@ -53,7 +53,7 @@ def plot_graph(type, eig_value, i, x, y, xtick, ytick, filename):
     plt.xlabel(x, fontsize=10)
     plt.ylabel(y, fontsize=10)
     plt.savefig(filename, pad_inches = 0, bbox_inches='tight')
-    plt.show(block=False)
+    #plt.show(block=False)
     return
 
 #Load image data
@@ -86,7 +86,7 @@ Xa=e_vecs[:,:M]*X_proj
 X_reconst=X_avg+np.sum(Xa, axis=1)
 
 # Plot the chosen test face & reconstructed face for comparison
-plot_image(X_train[test1,:], 46, 56, 'Outputs/test_face_M='+str(M))
+plot_image(X_test[test1,:], 46, 56, 'Outputs/test_face_M='+str(M))
 plot_image(X_reconst, 46, 56, 'Outputs/reconstructed_face_M='+str(M))
 
 # Classification
@@ -108,3 +108,4 @@ for m in range(M_range):
 # Plot success rate against M
 plot_graph("line", correctness, M_range, 'M', 'success rate', 5, 5, 'Outputs/success_rate_against_M')
 print("Highest succes rate %.2f%% when M = %d" % (np.max(correctness), np.argmax(correctness)))
+#plt.show()
