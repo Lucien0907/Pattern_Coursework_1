@@ -91,6 +91,7 @@ M_range=100
 test_size = X_test.shape[0]
 correctness = np.zeros(M_range)
 for m in range(M_range):
+    # This loop could take a while depends on size of M_range
     mark = 0
     for i in range(test_size):
         Wt=np.dot(X_test[i,:]-X_avg, e_vecs[:,:m])
