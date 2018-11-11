@@ -31,6 +31,7 @@ def compute_eigenspace(X_data, mode):
 
 def plot_image(face_vector, w, h, filename):
     # Reshape the given image data, plot the image
+    plt.figure()
     image = np.reshape(np.absolute(face_vector),(w,h)).T
     fig = plt.imshow(image, cmap = 'gist_gray')
     fig.axes.get_xaxis().set_visible(False)
@@ -40,17 +41,19 @@ def plot_image(face_vector, w, h, filename):
     plt.close()
     return
 
-def plot_graph(eig_value, i, x, y, xtick, ytick, filename):
+def plot_graph(type, eig_value, i, x, y, xtick, ytick, filename):
     # Plot the first i eigenvalues
-    fig, ax = plt.subplots(1,1)
-    ax.plot(list(range(0, i)), eig_value[:i])
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    if type == "bar":
+        plt.bar(list(range(0, i)), eig_value[:i])
+    else:plt.plot(list(range(0, i)), eig_value[:i])
     ax.xaxis.set_major_locator(ticker.MultipleLocator(xtick))
     ax.yaxis.set_major_locator(ticker.MultipleLocator(ytick))
     plt.xlabel(x, fontsize=10)
     plt.ylabel(y, fontsize=10)
     plt.savefig(filename, pad_inches = 0, bbox_inches='tight')
-    plt.show()
-    plt.close()
+    plt.show(block=False)
     return
 
 #Load image data
@@ -72,9 +75,9 @@ e_vecs = (e_vecs.T[idx]).T
 
 # Choose and plot the best M eigenfaces
 M = 20
-plot_graph(e_vals, M, 'index', 'eigen_value', 1, 100000, 'Outputs/first_'+str(M)+'_eigenvalues')
+plot_graph("bar", e_vals, M, 'index', 'eigen_value', 1, 100000, 'Outputs/first_'+str(M)+'_eigenvalues')
 for i in range(M):
-    plot_image(e_vecs[:,i], 46, 56, 'Outputs/eigenface_'+str(i))
+    plot_image(e_vecs[:,i], 46, 56, 'Outputs/Eigenfaces/eigenface_'+str(i))
 
 # Face reconstruction
 test1=29
@@ -87,7 +90,7 @@ plot_image(X_train[test1,:], 46, 56, 'Outputs/test_face_M='+str(M))
 plot_image(X_reconst, 46, 56, 'Outputs/reconstructed_face_M='+str(M))
 
 # Classification
-M_range=100
+M_range=30
 test_size = X_test.shape[0]
 correctness = np.zeros(M_range)
 for m in range(M_range):
@@ -103,5 +106,5 @@ for m in range(M_range):
     correctness[m] = (mark/test_size)*100
 
 # Plot success rate against M
-plot_graph(correctness, M_range, 'M', 'success rate', 10, 10, 'Outputs/success_rate_against_M')
+plot_graph("line", correctness, M_range, 'M', 'success rate', 5, 5, 'Outputs/success_rate_against_M')
 print("Highest succes rate %.2f%% when M = %d" % (np.max(correctness), np.argmax(correctness)))
