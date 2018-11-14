@@ -28,11 +28,11 @@ for v in X_train:
 
 for i in range(1, 52):
     X_train_rand, X_test_rand, y_train_rand, y_test_rand = train_test_split(face_data.T[0+i*10:10+i*10,:], face_labels.T[0+i*10:10+i*10,:], test_size=0.2)
-    m = np.mean(X_train_rand, axis=0)
+    mi = np.mean(X_train_rand, axis=0)
     for v in X_train_rand:
-        S0 = np.outer((v - m), (v - m))
+        S0 = np.outer((v - mi), (v - mi))
         Sw = Sw + S0
-    Mi = np.vstack((Mi, m))
+    Mi = np.vstack((Mi, mi))
     X_train = np.append(X_train, X_train_rand, axis=0)
     X_test = np.append(X_test, X_test_rand, axis=0)
     y_train = np.append(y_train, y_train_rand, axis=0)
