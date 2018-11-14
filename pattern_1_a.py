@@ -18,7 +18,15 @@ face_data = mat_content['X']
 face_labels = mat_content['l']
 
 # Split into a training and testing set
-X_train, X_test, y_train, y_test = train_test_split(face_data.T, face_labels.T, test_size=0.3, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(face_data.T[0:10,:], face_labels.T[0:10,:], test_size=0.2)
+for i in range(1, 52):
+    X_train_rand, X_test_rand, y_train_rand, y_test_rand = train_test_split(face_data.T[0+i*10:10+i*10,:], face_labels.T[0+i*10:10+i*10,:], test_size=0.2)
+    X_train = np.append(X_train, X_train_rand, axis=0)
+    X_test = np.append(X_test, X_test_rand, axis=0)
+    y_train = np.append(y_train, y_train_rand, axis=0)
+    y_test = np.append(y_test, y_test_rand, axis=0)
+
+# Compute the eigen space of traing data
 X_avg, A, e_vals, e_vecs= pr.compute_eigenspace(X_train, 'low')
 
 # Plot mean face
