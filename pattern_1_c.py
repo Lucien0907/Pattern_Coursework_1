@@ -75,7 +75,6 @@ Wlda = e_vecs_lda[:,:Mlda]
 # Optimal fisherspace
 Wopt_t = np.dot(Wlda.T, Wpca.T)
 
-#pr.plot_graph("bar", Wopt_t, Mlda, 'index', 'eigen_value', 1, 100000, 'Outputs_c/eigenvlues')
 # Plot the best Mlda fisherfaces
 for i in range(Mlda):
     pr.plot_image(Wopt_t.T[:,i], 46, 56, 'Outputs_c/fisher_faces_'+str(i))
