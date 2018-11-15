@@ -8,6 +8,8 @@ Created on Thu Nov 15 16:29:46 2018
 
 from __future__ import print_function
 from sklearn.model_selection import train_test_split
+from sklearn.metrics import confusion_matrix
+import matplotlib.pyplot as plt
 
 import numpy as np
 import scipy.io as sio
@@ -109,6 +111,7 @@ for i in range(T):
     else:
         W_OPT = np.hstack((W_OPT, Wopt_t))
 
+
 #correctness for individual bags
 test_size = X_test.shape[0]
 correctness = np.zeros((T_M1,T))    
@@ -129,9 +132,9 @@ for j in range(T):
             if y_train[e_idx] == y_test[i]:
                 mark+=1
         correctness[k,j] = (mark/test_size)*100
-        
-        
-#majority voting        
+
+
+
 test_size = X_test.shape[0]
 mark = 0
 for i in range(test_size):   
@@ -159,4 +162,13 @@ for i in range(test_size):
     idx_m = np.bincount(IDX).argmax()
     if idx_m == y_test[i]:
         mark+=1
+    if(i == 0):
+        y_pred = idx_m
+    else:
+        y_pred = np.hstack((y_pred, idx_m))
+        
 crtness = (mark/test_size)*100
+# Compute confusion matrix
+cnf_matrix = confusion_matrix(y_test, y_pred)
+plt.imshow(cnf_matrix, cmap='hot', interpolation='nearest')
+plt.show()
