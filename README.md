@@ -1,7 +1,10 @@
 # Q&A 
 https://docs.google.com/document/d/1ok5L3-td_jNWF-1LAQTSedIQZQbKrR_c_XLDmKFr7S4/edit
 
-# Report
+# Report 
+PR_cw1 Report
+
+# Notice
 1) Do not copy standard formulas from lecture notes, explain algorithms in detail, or copy figures from other sources. References to lecture slides or publications/webpages are enough in such cases, however short explanations of new terms or parameters referred to are needed. 
 
 2) Select relevant results that support the points you want to make rather than everything that python/matlab gives. 
