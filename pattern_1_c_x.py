@@ -134,7 +134,7 @@ for j in range(T):
         correctness[k,j] = (mark/test_size)*100
 
 
-
+#majority voting
 test_size = X_test.shape[0]
 mark = 0
 for i in range(test_size):   
